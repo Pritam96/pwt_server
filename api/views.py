@@ -30,12 +30,24 @@ def GetStringGetMethod(request):
     site_time = ''
     shift = ''
 
+    # changed
+    f = ''
+    g = ''
+    h = ''
+
     mid = request.GET.get('a')
     b = request.GET.get('b')
     c = request.GET.get('c')
     d = request.GET.get('d')
     e = request.GET.get('e')
     m = request.GET.get('m')
+
+    # changed
+    f = request.GET.get('f')
+    g = request.GET.get('g')
+    h = request.GET.get('h')
+
+
     if re.search(r'\w+\$\w+\$\w+\$\w+$', m):
         flag = 'ts'
         for i in m:
@@ -84,94 +96,196 @@ def GetStringGetMethod(request):
             pass
 
     if ts != '999':
-        try:
-            if len(c) == 2:
-                outer_diameter_code = c[0]
-                pipe_length_code = c[1]
-            elif len(c) == 4:
-                outer_diameter_code = c[0] + c[1]
-                pipe_length_code = c[2] + c[3]
-            elif len(c) == 3:
-                if int(c[0] + c[1]) > 19:
+
+        # changed
+        if int(mid) < 17:
+            try:
+                if len(c) == 2:
                     outer_diameter_code = c[0]
-                    pipe_length_code = c[1] + c[2]
+                    pipe_length_code = c[1]
+                elif len(c) == 4:
+                    outer_diameter_code = c[0] + c[1]
+                    pipe_length_code = c[2] + c[3]
+                elif len(c) == 3:
+                    if int(c[0] + c[1]) > 19:
+                        outer_diameter_code = c[0]
+                        pipe_length_code = c[1] + c[2]
+                    else:
+                        outer_diameter_code = c[0] + c[1]
+                        pipe_length_code = c[2]
                 else:
                     outer_diameter_code = c[0] + c[1]
                     pipe_length_code = c[2]
-            else:
-                outer_diameter_code = c[0] + c[1]
-                pipe_length_code = c[2]
-        except:
-            outer_diameter_code = None
-            pipe_length_code = None
-        try:
-            bms = BasicMetarialStandard.objects.filter(code=b[0])[0]
-            basic_metarial = bms.toDic().get("basic_metarial")
-        except:
-            bms = None
-            basic_metarial = None
-        try:
-            stc = StandardTypeClassification.objects.filter(
-                basic_metarial=bms, code=b[1])[0]
-            standard_type_classification = stc.toDic().get("standard_type_classification")
-        except:
-            stc = None
-            standard_type_classification = None
-        try:
-            if(len(b) == 4):
-                pts_code = b[2] + b[3]
-            else:
-                pts_code = b[2]
-            pts = PressureTypeSpecification.objects.filter(
-                basic_metarial=bms, standard_type_classification=stc, code=pts_code)[0]
-            pressure_type_specification = pts.toDic().get("pressure_type_specification")
-        except:
-            pts = None
-            pressure_type_specification = None
-        try:
-            pod = PipeOuterDiameter.objects.filter(
-                standard_type_classification=stc, code=outer_diameter_code)[0]
-            pod_dic = pod.toDic()
-            outer_diameter_unit=str(pod_dic.get("unit"))
-            outer_diameter = float(pod_dic.get("outer_diameter"))
-        except:
-            pod = None
-            outer_diameter = None
-            outer_diameter_unit = None
-        try:
-            pl = PipeLength.objects.filter(
-                standard_type_classification=stc, code=pipe_length_code)[0]
-            pl_dic = pl.toDic()
-            length = float(pl_dic.get("length"))
-            length_unit = str(pl_dic.get("unit"))
-        except:
-            print(e)
-            pl = None
-            length = None
-            length_unit = None
-        try:
-            if int(d) - int(weight) < 0:
-                weightloss = int(d) - int(weight)
-                weightgain = 0
-            else:
-                weightgain = int(d) - int(weight)
-                weightloss = 0
-            if ps == '0':
-                pass_status = 'Underweight'
-            elif ps == '1':
-                pass_status = 'Overweight'
-            elif ps == '2':
-                pass_status = 'Passed'
-            PipeDataProcessed.objects.create(machine_id=mid, basic_metarial=basic_metarial, standard_type_classification=standard_type_classification, pressure_type_specification=pressure_type_specification, outer_diameter=outer_diameter, outer_diameter_unit=outer_diameter_unit, length = length, length_unit = length_unit, timestamp = int(ts), count = int(count), weight = int(weight), maxweight = int(d), minweight = int(e), weightgain = weightgain, weightloss = weightloss, pass_status = pass_status, site_time = site_time, shift = shift)
-        except Exception as excep:
-            print(excep)
+            except:
+                outer_diameter_code = None
+                pipe_length_code = None
+            try:
+                bms = BasicMetarialStandard.objects.filter(code=b[0])[0]
+                basic_metarial = bms.toDic().get("basic_metarial")
+            except:
+                bms = None
+                basic_metarial = None
+            try:
+                # stc = StandardTypeClassification.objects.filter(
+                #     basic_metarial=bms, code=b[1])[0]
+                # standard_type_classification = stc.toDic().get("standard_type_classification")
+
+                # changed
+                if mid == '16':
+                    stc = StandardTypeClassification.objects.filter(
+                        basic_metarial=bms, code=b[1]+b[2])[0]
+                else:
+                    stc = StandardTypeClassification.objects.filter(
+                        basic_metarial=bms, code=b[1])[0]
+
+                standard_type_classification = stc.toDic().get("standard_type_classification")
+                
+            except:
+                stc = None
+                standard_type_classification = None
+            try:
+                if(len(b) == 4):
+                    # pts_code = b[2] + b[3]
+
+                    # changed
+                    if mid == '16':
+                        pts_code = b[3]
+                    else:
+                        pts_code = b[2] + b[3]
+                else:
+                    pts_code = b[2]
+                pts = PressureTypeSpecification.objects.filter(
+                    basic_metarial=bms, standard_type_classification=stc, code=pts_code)[0]
+                pressure_type_specification = pts.toDic().get("pressure_type_specification")
+            except:
+                pts = None
+                pressure_type_specification = None
+            try:
+                pod = PipeOuterDiameter.objects.filter(
+                    standard_type_classification=stc, code=outer_diameter_code)[0]
+                pod_dic = pod.toDic()
+                outer_diameter_unit=str(pod_dic.get("unit"))
+                outer_diameter = float(pod_dic.get("outer_diameter"))
+            except:
+                pod = None
+                outer_diameter = None
+                outer_diameter_unit = None
+            try:
+                pl = PipeLength.objects.filter(
+                    standard_type_classification=stc, code=pipe_length_code)[0]
+                pl_dic = pl.toDic()
+                length = float(pl_dic.get("length"))
+                length_unit = str(pl_dic.get("unit"))
+            except:
+                print(e)
+                pl = None
+                length = None
+                length_unit = None
+            try:
+                if int(d) - int(weight) < 0:
+                    weightloss = int(d) - int(weight)
+                    weightgain = 0
+                else:
+                    weightgain = int(d) - int(weight)
+                    weightloss = 0
+                if ps == '0':
+                    pass_status = 'Underweight'
+                elif ps == '1':
+                    pass_status = 'Overweight'
+                elif ps == '2':
+                    pass_status = 'Passed'
+                PipeDataProcessed.objects.create(machine_id=mid, basic_metarial=basic_metarial, standard_type_classification=standard_type_classification, pressure_type_specification=pressure_type_specification, outer_diameter=outer_diameter, outer_diameter_unit=outer_diameter_unit, length = length, length_unit = length_unit, timestamp = int(ts), count = int(count), weight = int(weight), maxweight = int(d), minweight = int(e), weightgain = weightgain, weightloss = weightloss, pass_status = pass_status, site_time = site_time, shift = shift)
+            except Exception as excep:
+                print(excep)
+
+        else:
+            try:
+                outer_diameter_code = e
+                pipe_length_code = f
+            except:
+                outer_diameter_code = None
+                pipe_length_code = None
+            try:
+                bms = BasicMetarialStandard.objects.filter(code=b)[0]
+                basic_metarial = bms.toDic().get("basic_metarial")
+            except:
+                bms = None
+                basic_metarial = None
+            try:
+                stc = StandardTypeClassification.objects.filter(
+                    basic_metarial=bms, code=c)[0]
+                standard_type_classification = stc.toDic().get("standard_type_classification")
+            except:
+                stc = None
+                standard_type_classification = None
+            try:
+                pts_code = d
+                pts = PressureTypeSpecification.objects.filter(
+                    basic_metarial=bms, standard_type_classification=stc, code=pts_code)[0]
+                pressure_type_specification = pts.toDic().get("pressure_type_specification")
+            except:
+                pts = None
+                pressure_type_specification = None
+            try:
+                pod = PipeOuterDiameter.objects.filter(
+                    standard_type_classification=stc, code=outer_diameter_code)[0]
+                pod_dic = pod.toDic()
+                outer_diameter_unit = str(pod_dic.get("unit"))
+                outer_diameter = float(pod_dic.get("outer_diameter"))
+                print(outer_diameter, outer_diameter_unit)
+            except:
+                pod = None
+                outer_diameter = None
+                outer_diameter_unit = None
+            try:
+                pl = PipeLength.objects.filter(
+                    standard_type_classification=stc, code=pipe_length_code)[0]
+                pl_dic = pl.toDic()
+                length = float(pl_dic.get("length"))
+                length_unit = str(pl_dic.get("unit"))
+            except:
+                print(e)
+                pl = None
+                length = None
+                length_unit = None
+            try:
+                if int(g) - int(weight) < 0:
+                    weightloss = int(g) - int(weight)
+                    weightgain = 0
+                else:
+                    weightgain = int(g) - int(weight)
+                    weightloss = 0
+                if ps == '3':
+                    pass_status = 'Overweight Reject'
+                elif ps == '4':
+                    pass_status = 'Overweight Pass'
+                elif ps == '5':
+                    pass_status = 'Underweight Pass'
+                elif ps == '6':
+                    pass_status = 'Underweight Reject'
+                elif ps == '2':
+                    pass_status = 'Passed'
+                PipeDataProcessed.objects.create(machine_id=mid, basic_metarial=basic_metarial, standard_type_classification=standard_type_classification, pressure_type_specification=pressure_type_specification, outer_diameter=outer_diameter, outer_diameter_unit=outer_diameter_unit,
+                                                    length=length, length_unit=length_unit, timestamp=int(ts), count=int(count), weight=int(weight), maxweight=int(g), minweight=int(h), weightgain=weightgain, weightloss=weightloss, pass_status=pass_status, site_time=site_time, shift=shift)
+            except Exception as excep:
+                print(excep)
+
     try:
         site_time = site_time.isoformat()
     except:
         pass
     try:
-        PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, ts=ts, count=count,
-                                weight=weight, ps=ps, site_time=site_time, shift=shift)
+        # PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, ts=ts, count=count,
+        #                         weight=weight, ps=ps, site_time=site_time, shift=shift)
+    
+        # changed
+        if int(mid) > 16:
+            PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, f=f, g=g, h=h, ts=ts, count=count,
+                                    weight=weight, ps=ps, site_time=site_time, shift=shift)
+        else:
+            PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, ts=ts, count=count,
+                                    weight=weight, ps=ps, site_time=site_time, shift=shift)
+
     except:
         print("PipeData.objects.create ERROR")
     return HttpResponse(status=200)
@@ -193,112 +307,221 @@ def get_synced_data(request):
     ps = request.GET.get('ps', None)
     site_time = request.GET.get('site_time', None)
     shift = request.GET.get('shift', None)
-    if mid != None and b != None and c != None and d != None and e != None and ts != None and count != None and weight != None and ps != None and site_time != None and shift != None:
-        try:
-            MachineStatus.objects.create(machine_id=Machine.objects.get(machine_id=mid), active_date_time=timezone.now())
-        except:
-            MachineStatus.objects.filter(machine_id=Machine.objects.get(machine_id=mid)).update(active_date_time=timezone.now())
-        if len(c) == 2:
-            outer_diameter_code = c[0]
-            pipe_length_code = c[1]
-        elif len(c) == 4:
-            outer_diameter_code = c[0] + c[1]
-            pipe_length_code = c[2] + c[3]
-        elif len(c) == 3:
-            if int(c[0] + c[1]) > 19:
+
+    # changed
+    f = request.GET.get('f', None)
+    g = request.GET.get('g', None)
+    h = request.GET.get('h', None)
+
+    if int(mid) < 17:
+        if mid != None and b != None and c != None and d != None and e != None and ts != None and count != None and weight != None and ps != None and site_time != None and shift != None:
+            try:
+                MachineStatus.objects.create(machine_id=Machine.objects.get(machine_id=mid), active_date_time=timezone.now())
+            except:
+                MachineStatus.objects.filter(machine_id=Machine.objects.get(machine_id=mid)).update(active_date_time=timezone.now())
+            if len(c) == 2:
                 outer_diameter_code = c[0]
-                pipe_length_code = c[1] + c[2]
+                pipe_length_code = c[1]
+            elif len(c) == 4:
+                outer_diameter_code = c[0] + c[1]
+                pipe_length_code = c[2] + c[3]
+            elif len(c) == 3:
+                if int(c[0] + c[1]) > 19:
+                    outer_diameter_code = c[0]
+                    pipe_length_code = c[1] + c[2]
+                else:
+                    outer_diameter_code = c[0] + c[1]
+                    pipe_length_code = c[2]
             else:
                 outer_diameter_code = c[0] + c[1]
                 pipe_length_code = c[2]
-        else:
-            outer_diameter_code = c[0] + c[1]
-            pipe_length_code = c[2]
-        try:
-            bms = BasicMetarialStandard.objects.get(code=b[0])
-            basic_metarial = bms.basic_metarial
-        except:
-            bms = None
-            basic_metarial = None
-        try:
-            stc = StandardTypeClassification.objects.get(
-                basic_metarial=bms, code=b[1])
-            standard_type_classification = stc.standard_type_classification
-        except:
-            stc = None
-            standard_type_classification = None
-        try:
-            if(len(b) == 4):
-                pts_code = b[2] + b[3]
+            try:
+                bms = BasicMetarialStandard.objects.get(code=b[0])
+                basic_metarial = bms.basic_metarial
+            except:
+                bms = None
+                basic_metarial = None
+            try:
+                # stc = StandardTypeClassification.objects.get(
+                #     basic_metarial=bms, code=b[1])
+                # standard_type_classification = stc.standard_type_classification
+
+                # changed
+                if mid == '16':
+                    stc = StandardTypeClassification.objects.filter(
+                        basic_metarial=bms, code=b[1]+b[2])
+                else:
+                    stc = StandardTypeClassification.objects.filter(
+                        basic_metarial=bms, code=b[1])
+
+                standard_type_classification = stc.toDic().get("standard_type_classification")
+            except:
+                stc = None
+                standard_type_classification = None
+            try:
+                if(len(b) == 4):
+                    # pts_code = b[2] + b[3]
+
+                    # changed
+                    if mid == '16':
+                        pts_code = b[3]
+                    else:
+                        pts_code = b[2] + b[3]
+                else:
+                    pts_code = b[2]
+                pts = PressureTypeSpecification.objects.get(
+                    basic_metarial=bms, standard_type_classification=stc, code=pts_code)
+                pressure_type_specification = pts.pressure_type_specification
+            except:
+                pts = None
+                pressure_type_specification = None
+            try:
+                pod = PipeOuterDiameter.objects.get(
+                    standard_type_classification=stc, code=outer_diameter_code)
+                outer_diameter_unit=pod.unit.unit
+                outer_diameter = float(pod.outer_diameter)
+            except:
+                pod = None
+                outer_diameter = None
+                outer_diameter_unit = None
+            try:
+                pl = PipeLength.objects.get(
+                    standard_type_classification=stc, code=pipe_length_code)
+                length = float(pl.length)
+                length_unit = str(pl.unit.unit)
+            except:
+                pl = None
+                length = None
+                length_unit = None
+            if int(d) - int(weight) < 0:
+                weightloss = int(d) - int(weight)
+                weightgain = 0
             else:
-                pts_code = b[2]
-            pts = PressureTypeSpecification.objects.get(
-                basic_metarial=bms, standard_type_classification=stc, code=pts_code)
-            pressure_type_specification = pts.pressure_type_specification
-        except:
-            pts = None
-            pressure_type_specification = None
-        try:
-            pod = PipeOuterDiameter.objects.get(
-                standard_type_classification=stc, code=outer_diameter_code)
-            outer_diameter_unit=pod.unit.unit
-            outer_diameter = float(pod.outer_diameter)
-        except:
-            pod = None
-            outer_diameter = None
-            outer_diameter_unit = None
-        try:
-            pl = PipeLength.objects.get(
-                standard_type_classification=stc, code=pipe_length_code)
-            length = float(pl.length)
-            length_unit = str(pl.unit.unit)
-        except:
-            pl = None
-            length = None
-            length_unit = None
-        if int(d) - int(weight) < 0:
-            weightloss = int(d) - int(weight)
-            weightgain = 0
+                weightgain = int(d) - int(weight)
+                weightloss = 0
+            if ps == '0':
+                pass_status = 'Underweight'
+            elif ps == '1':
+                pass_status = 'Overweight'
+            elif ps == '2':
+                pass_status = 'Passed'
+
+            try:
+                PipeDataProcessed.objects.create(
+                    machine_id=mid, 
+                    basic_metarial=basic_metarial, 
+                    standard_type_classification=standard_type_classification, 
+                    pressure_type_specification=pressure_type_specification, 
+                    outer_diameter=outer_diameter, 
+                    outer_diameter_unit=outer_diameter_unit, 
+                    length=length, 
+                    length_unit=length_unit, 
+                    timestamp=int(ts), 
+                    count=int(count), 
+                    weight=int(weight), 
+                    maxweight=int(d), 
+                    minweight=int(e), 
+                    weightgain=weightgain, 
+                    weightloss=weightloss, 
+                    pass_status=pass_status, 
+                    site_time=timezone.make_aware(datetime.datetime.strptime(site_time[:19], "%Y-%m-%dT%H:%M:%S")),
+                    shift=shift
+                )
+            except Exception as exception:
+                print(str(exception))
+            try:
+                PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, ts=ts, count=count,
+                                        weight=weight, ps=ps, site_time=site_time, shift=shift)
+            except Exception as exception:
+                print(str(exception))
+            return HttpResponse(status=200)
         else:
-            weightgain = int(d) - int(weight)
-            weightloss = 0
-        if ps == '0':
-            pass_status = 'Underweight'
-        elif ps == '1':
-            pass_status = 'Overweight'
-        elif ps == '2':
-            pass_status = 'Passed'
-        try:
-            PipeDataProcessed.objects.create(
-                machine_id=mid, 
-                basic_metarial=basic_metarial, 
-                standard_type_classification=standard_type_classification, 
-                pressure_type_specification=pressure_type_specification, 
-                outer_diameter=outer_diameter, 
-                outer_diameter_unit=outer_diameter_unit, 
-                length=length, 
-                length_unit=length_unit, 
-                timestamp=int(ts), 
-                count=int(count), 
-                weight=int(weight), 
-                maxweight=int(d), 
-                minweight=int(e), 
-                weightgain=weightgain, 
-                weightloss=weightloss, 
-                pass_status=pass_status, 
-                site_time=timezone.make_aware(datetime.datetime.strptime(site_time[:19], "%Y-%m-%dT%H:%M:%S")),
-                shift=shift
-            )
-        except Exception as exception:
-            print(str(exception))
-        try:
-            PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, ts=ts, count=count,
-                                    weight=weight, ps=ps, site_time=site_time, shift=shift)
-        except Exception as exception:
-            print(str(exception))
-        return HttpResponse(status=200)
+            return HttpResponse(status=400)
+
+
     else:
-       return HttpResponse(status=400)
+        if mid != None and b != None and c != None and d != None and e != None and f != None and g != None and h != None and ts != None and count != None and weight != None and ps != None and site_time != None and shift != None:
+            try:
+                MachineStatus.objects.create(machine_id=Machine.objects.get(machine_id=mid), active_date_time=timezone.now())
+            except:
+                MachineStatus.objects.filter(machine_id=Machine.objects.get(machine_id=mid)).update(active_date_time=timezone.now())
+            try:
+                outer_diameter_code = e
+                pipe_length_code = f
+            except:
+                outer_diameter_code = None
+                pipe_length_code = None
+            try:
+                bms = BasicMetarialStandard.objects.filter(code=b)
+                basic_metarial = bms.basic_metarial
+            except:
+                bms = None
+                basic_metarial = None
+            try:
+                stc = StandardTypeClassification.objects.filter(
+                    basic_metarial=bms, code=c)
+                standard_type_classification = stc.toDic().get("standard_type_classification")
+            except:
+                stc = None
+                standard_type_classification = None
+            try:
+                pts_code = d
+                pts = PressureTypeSpecification.objects.filter(
+                    basic_metarial=bms, standard_type_classification=stc, code=pts_code)
+                pressure_type_specification = pts.pressure_type_specification
+            except:
+                pts = None
+                pressure_type_specification = None
+            try:
+                pod = PipeOuterDiameter.objects.filter(
+                    standard_type_classification=stc, code=outer_diameter_code)
+                outer_diameter_unit = pod.unit.unit
+                outer_diameter = float(pod.outer_diameter)
+            except:
+                pod = None
+                outer_diameter = None
+                outer_diameter_unit = None
+            try:
+                pl = PipeLength.objects.filter(
+                    standard_type_classification=stc, code=pipe_length_code)
+                length = float(pl.length)
+                length_unit = str(pl.unit.unit)
+            except:
+                pl = None
+                length = None
+                length_unit = None
+            
+            if int(g) - int(weight) < 0:
+                weightloss = int(g) - int(weight)
+                weightgain = 0
+            else:
+                weightgain = int(g) - int(weight)
+                weightloss = 0
+            if ps == '3':
+                pass_status = 'Overweight Reject'
+            elif ps == '4':
+                pass_status = 'Overweight Pass'
+            elif ps == '5':
+                pass_status = 'Underweight Pass'
+            elif ps == '6':
+                pass_status = 'Underweight Reject'
+            elif ps == '2':
+                pass_status = 'Passed'
+            try:    
+                PipeDataProcessed.objects.create(machine_id=mid, basic_metarial=basic_metarial, standard_type_classification=standard_type_classification, pressure_type_specification=pressure_type_specification, outer_diameter=outer_diameter, outer_diameter_unit=outer_diameter_unit,
+                                                length=length, length_unit=length_unit, timestamp=int(ts), count=int(count), weight=int(weight), maxweight=int(g), minweight=int(h), weightgain=weightgain, weightloss=weightloss, pass_status=pass_status, site_time=timezone.make_aware(datetime.datetime.strptime(site_time[:19], "%Y-%m-%dT%H:%M:%S")), shift=shift)
+            except Exception as exception:
+                print(str(exception))
+
+            try:
+                PipeData.objects.create(mid=mid, b=b, c=c, d=d, e=e, f=f, g=g, h=h, ts=ts, count=count,
+                                    weight=weight, ps=ps, site_time=site_time, shift=shift)
+            except Exception as exception:
+                print(str(exception))
+            return HttpResponse(status=200)
+
+        else:
+            return HttpResponse(status=400)
     
 
     

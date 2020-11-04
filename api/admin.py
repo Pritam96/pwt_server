@@ -47,7 +47,7 @@ class PipeLengthAdmin(admin.ModelAdmin):
 admin.site.register(PipeLength, PipeLengthAdmin)
 
 class PipeDataAdmin(admin.ModelAdmin):
-    list_display = ('mid', 'b', 'c', 'd', 'e', 'ts', 'count', 'weight', 'ps', 'site_time', 'shift')
+    list_display = ('mid', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'ts', 'count', 'weight', 'ps', 'site_time', 'shift')
     def has_add_permission(self, request, obj=None):
         return False
 admin.site.register(PipeData, PipeDataAdmin)

@@ -22,9 +22,16 @@ class PipeData(models.Model):
     site_time = models.TextField()
     shift = models.CharField(max_length=1, default="1")
 
-    def toDic(self):
-        return {'a': self.mid, 'b': self.b, 'c': self.c, 'd': self.d, 'e': self.e, 'ts': self.ts, 'count': self.count, 'weight': self.weight, 'ps': self.ps, "site_time": self.site_time, "shift": self.shift}
+    # changed
+    f = models.TextField(blank=True)
+    g = models.TextField(blank=True)
+    h = models.TextField(blank=True)
 
+    # def toDic(self):
+    #     return {'a': self.mid, 'b': self.b, 'c': self.c, 'd': self.d, 'e': self.e, 'ts': self.ts, 'count': self.count, 'weight': self.weight, 'ps': self.ps, "site_time": self.site_time, "shift": self.shift}
+
+    def toDic(self):
+        return {'a': self.mid, 'b': self.b, 'c': self.c, 'd': self.d, 'e': self.e, 'f': self.f, 'g': self.g, 'h': self.h, 'ts': self.ts, 'count': self.count, 'weight': self.weight, 'ps': self.ps, "site_time": self.site_time, "shift": self.shift}
 
 
 
